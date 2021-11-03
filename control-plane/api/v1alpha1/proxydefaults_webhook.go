@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/consul-k8s/control-plane/api/common"
 	capi "github.com/hashicorp/consul/api"
 	admissionv1 "k8s.io/api/admission/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,21 +42,23 @@ func (v *ProxyDefaultsWebhook) Handle(ctx context.Context, req admission.Request
 	if req.Operation == admissionv1.Create {
 		v.Logger.Info("validate create", "name", proxyDefaults.KubernetesName())
 
-		if proxyDefaults.KubernetesName() != common.Global {
-			return admission.Errored(http.StatusBadRequest,
-				fmt.Errorf(`%s resource name must be "%s"`,
-					proxyDefaults.KubeKind(), common.Global))
-		}
+		//TODO(tien.nguyenvan) Remove validate common.Global
+		//if proxyDefaults.KubernetesName() != common.Global {
+		//	return admission.Errored(http.StatusBadRequest,
+		//		fmt.Errorf(`%s resource name must be "%s"`,
+		//			proxyDefaults.KubeKind(), common.Global))
+		//}
 
 		if err := v.Client.List(ctx, &proxyDefaultsList); err != nil {
 			return admission.Errored(http.StatusInternalServerError, err)
 		}
 
-		if len(proxyDefaultsList.Items) > 0 {
-			return admission.Errored(http.StatusBadRequest,
-				fmt.Errorf("%s resource already defined - only one global entry is supported",
-					proxyDefaults.KubeKind()))
-		}
+		//TODO(tien.nguyenvan) Remove check proxy default items count
+		//if len(proxyDefaultsList.Items) > 0 {
+		//	return admission.Errored(http.StatusBadRequest,
+		//		fmt.Errorf("%s resource already defined - only one global entry is supported",
+		//			proxyDefaults.KubeKind()))
+		//}
 	}
 
 	if err := proxyDefaults.Validate(v.ConsulMeta); err != nil {
